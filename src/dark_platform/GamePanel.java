@@ -99,7 +99,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         g = (Graphics2D) image.getGraphics();
 
-        tileMap = new TileMap("src\\res\\testMap3.txt", 32);
+        tileMap = new TileMap("src\\res\\testMap2.txt", 32);
         tileMap.loadTiles("src\\res\\Graphs\\tileset.gif");
         player = new Player(tileMap);
         player.setX(50);
@@ -148,9 +148,9 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     private void render() {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, WIDTH, HEIGHT);
+        lines.draw(g);
         tileMap.draw(g);
         player.draw(g);
-        lines.draw(g);
         for(Point point: points){
             point.draw(g);
         }
