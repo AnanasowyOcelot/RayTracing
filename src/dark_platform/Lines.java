@@ -56,12 +56,12 @@ public class Lines {
 
             if (visibleTriangle != null) {
                 try {
-                    visiblePointsX.add((int) visibleTriangle.getA().getX());
-                    visiblePointsY.add((int) visibleTriangle.getA().getY());
-                    visiblePointsX.add((int) visibleTriangle.getB().getX());
-                    visiblePointsY.add((int) visibleTriangle.getB().getY());
+//                    visiblePointsX.add((int) visibleTriangle.getA().getX());
+//                    visiblePointsY.add((int) visibleTriangle.getA().getY());
                     visiblePointsX.add((int) visibleTriangle.getC().getX());
                     visiblePointsY.add((int) visibleTriangle.getC().getY());
+                    visiblePointsX.add((int) visibleTriangle.getB().getX());
+                    visiblePointsY.add((int) visibleTriangle.getB().getY());
                 }catch (Exception ups){
                     ups.printStackTrace();
                 }
