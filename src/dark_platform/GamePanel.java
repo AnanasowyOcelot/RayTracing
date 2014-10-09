@@ -105,7 +105,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         player.setX(50);
         player.setY(50);
 
-//        addPoints();
+        addPoints();
         lines = new Lines(tileMap, player);
     }
 

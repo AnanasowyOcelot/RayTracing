@@ -24,6 +24,8 @@ public class Lines {
         int mapXModifier = (int) (50 - player.getX());
         int mapYModifier = (int) (50 - player.getY());
 
+
+
         ArrayList<Line2D> linesToDisplayMOD = new ArrayList<Line2D>();
         ArrayList<Line2D> mapOutLineMOD = new ArrayList<Line2D>();
         for (Line2D outline : mapOutline) {
@@ -76,7 +78,8 @@ public class Lines {
             prevMOD = currentMOD;
         }
 
-        g.setColor(new Color(205, 218, 63));
+        g.setColor(new Color(7, 14, 54));
+        g.setClip(new Polygon(convertIntegers(visiblePointsX), convertIntegers(visiblePointsY), visiblePointsX.size()));
         g.fillPolygon(convertIntegers(visiblePointsX), convertIntegers(visiblePointsY), visiblePointsX.size());
 
 
