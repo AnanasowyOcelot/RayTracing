@@ -24,16 +24,13 @@ public class Lines {
         int mapXModifier = (int) (50 - player.getX());
         int mapYModifier = (int) (50 - player.getY());
 
-
-
-        ArrayList<Line2D> linesToDisplayMOD = new ArrayList<Line2D>();
         ArrayList<Line2D> mapOutLineMOD = new ArrayList<Line2D>();
         for (Line2D outline : mapOutline) {
             Line2D outlineMOD = new Line2D.Float((int) outline.getX1() + mapXModifier, (int) outline.getY1() + mapYModifier, (int) outline.getX2() + mapXModifier, (int) outline.getY2() + mapYModifier);
             mapOutLineMOD.add(outlineMOD);
         }
 
-
+        ArrayList<Line2D> linesToDisplayMOD = new ArrayList<Line2D>();
         for (Point2D visibleCornerPoint : visibleCornerPoints) {
             Line2D cornerLineMOD = new Line2D.Float(GamePanel.WIDTH / 2, GamePanel.HEIGHT / 2, (int) (visibleCornerPoint.getX() + mapXModifier), (int) visibleCornerPoint.getY() + mapYModifier);
             int intersections = 0;
@@ -46,34 +43,21 @@ public class Lines {
                 linesToDisplayMOD.add(cornerLineMOD);
             }
         }
+
         sortLines(linesToDisplayMOD);
-        ArrayList<Line2D> middleLinesMOD = new ArrayList<Line2D>();
 
         Line2D prevMOD = linesToDisplayMOD.get(linesToDisplayMOD.size() - 1);
-
         ArrayList<Integer> visiblePointsX = new ArrayList<Integer>();
         ArrayList<Integer> visiblePointsY = new ArrayList<Integer>();
         for (Line2D currentMOD : linesToDisplayMOD) {
-            Triangle visibleTriangle = createVisibleArea(prevMOD, currentMOD, mapOutLineMOD);
+            Triangle visibleTriangle = createTriangleFromLines(prevMOD, currentMOD, mapOutLineMOD);
 
             if (visibleTriangle != null) {
-                try {
-//                    visiblePointsX.add((int) visibleTriangle.getA().getX());
-//                    visiblePointsY.add((int) visibleTriangle.getA().getY());
-                    visiblePointsX.add((int) visibleTriangle.getC().getX());
-                    visiblePointsY.add((int) visibleTriangle.getC().getY());
-                    visiblePointsX.add((int) visibleTriangle.getB().getX());
-                    visiblePointsY.add((int) visibleTriangle.getB().getY());
-                }catch (Exception ups){
-                    ups.printStackTrace();
-                }
-
+                visiblePointsX.add((int) visibleTriangle.getC().getX());
+                visiblePointsY.add((int) visibleTriangle.getC().getY());
+                visiblePointsX.add((int) visibleTriangle.getB().getX());
+                visiblePointsY.add((int) visibleTriangle.getB().getY());
             }
-
-
-//            g.setColor(Color.WHITE);
-
-//            g.fillPolygon(visibleTriangle.getDrawablePolygon());
 
             prevMOD = currentMOD;
         }
@@ -81,54 +65,32 @@ public class Lines {
         g.setColor(new Color(7, 14, 54));
         g.setClip(new Polygon(convertIntegers(visiblePointsX), convertIntegers(visiblePointsY), visiblePointsX.size()));
         g.fillPolygon(convertIntegers(visiblePointsX), convertIntegers(visiblePointsY), visiblePointsX.size());
-
-
-//        // LINIE DO ROGÓW
-//        for (Line2D lineMOD : linesToDisplayMOD) {
-//            g.setColor(Color.WHITE);
-//            g.draw(lineMOD);
-//        }
-//        // LINIE ŚRODKOWE
-//        for (Line2D currentMOD : linesToDisplayMOD) {
-//            Line2D middleLine = createLineBetween(prevMOD, currentMOD);
-//            g.setColor(Color.RED);
-//            g.draw(middleLine);
-//            prevMOD = currentMOD;
-//        }
-
     }
 
     public static int[] convertIntegers(ArrayList<Integer> integers) {
-        int[] ret = new int[integers.size()];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = integers.get(i);
+        int[] simpleArray = new int[integers.size()];
+        for (int i = 0; i < simpleArray.length; i++) {
+            simpleArray[i] = integers.get(i);
         }
-        return ret;
+        return simpleArray;
     }
 
-    private Triangle createVisibleArea(Line2D line1, Line2D line2, ArrayList<Line2D> outline) {
+    private Triangle createTriangleFromLines(Line2D line1, Line2D line2, ArrayList<Line2D> outline) {
         Line2D middleLine = createLineBetween(line1, line2);
-        Line2D partOfOutline = findFirstIntersectionLine(middleLine, outline);
-        Triangle visionTriangle = extendLinesToTriangle(line1, line2, partOfOutline);
-        return visionTriangle;
+        Line2D partOfOutlineIntersectingWithMiddleLine = findFirstIntersectionLine(middleLine, outline);
+        return extendLinesToCreateTriangle(line1, line2, partOfOutlineIntersectingWithMiddleLine);
     }
 
-    private Triangle extendLinesToTriangle(Line2D line1, Line2D line2, Line2D line3) {
-        if (setLineLength(line1, 500) != null &&
-                setLineLength(new Line2D.Double(line1.getP2(), line1.getP1()), 500) != null &&
-                setLineLength(line2, 500) != null &&
-                setLineLength(line3, 500) != null &&
-                setLineLength(new Line2D.Double(line2.getP2(), line2.getP1()), 500) != null &&
-                setLineLength(new Line2D.Double(line3.getP2(), line3.getP1()), 500) != null
-                ) {
-            Line2D newLine1 = new Line2D.Double(setLineLength(line1, 500).getP2(), setLineLength(new Line2D.Double(line1.getP2(), line1.getP1()), 500).getP2());
-            Line2D newLine2 = new Line2D.Double(setLineLength(line2, 500).getP2(), setLineLength(new Line2D.Double(line2.getP2(), line2.getP1()), 500).getP2());
-            Line2D newLine3 = new Line2D.Double(setLineLength(line3, 500).getP2(), setLineLength(new Line2D.Double(line3.getP2(), line3.getP1()), 500).getP2());
+    private Triangle extendLinesToCreateTriangle(Line2D line1, Line2D line2, Line2D line3) {
+        int maxLineLength = tileMap.getMapWidth() * tileMap.getTileSize();
+        Line2D newLine1 = new Line2D.Double(setLineLength(line1, maxLineLength).getP2(), setLineLength(new Line2D.Double(line1.getP2(), line1.getP1()), maxLineLength).getP2());
+        Line2D newLine2 = new Line2D.Double(setLineLength(line2, maxLineLength).getP2(), setLineLength(new Line2D.Double(line2.getP2(), line2.getP1()), maxLineLength).getP2());
+        Line2D newLine3 = new Line2D.Double(setLineLength(line3, maxLineLength).getP2(), setLineLength(new Line2D.Double(line3.getP2(), line3.getP1()), maxLineLength).getP2());
+        if (getIntersectionPoint(newLine1, newLine2) != null && getIntersectionPoint(newLine2, newLine3) != null && getIntersectionPoint(newLine3, newLine1) != null) {
             return new Triangle(getIntersectionPoint(newLine1, newLine2), getIntersectionPoint(newLine2, newLine3), getIntersectionPoint(newLine3, newLine1));
-
+        } else {
+            return null;
         }
-        else return null;
-
     }
 
     private Line2D findFirstIntersectionLine(final Line2D line1, ArrayList<Line2D> lines) {
@@ -150,36 +112,29 @@ public class Lines {
         if (intersectionLines.size() > 0) {
             return intersectionLines.get(0);
         } else {
-            return null;
+            return new NullLine();
         }
     }
 
     public Line2D setLineLength(Line2D line, double length) {
-        if (line != null) {
-            double aX = line.getX1();
-            double aY = line.getY1();
-            double bX = line.getX2();
-            double bY = line.getY2();
+        double aX = line.getX1();
+        double aY = line.getY1();
+        double bX = line.getX2();
+        double bY = line.getY2();
 
-            Line2D lineWithNewLength = line;
+        Line2D lineWithNewLength = line;
 
+        double lenAB = Math.sqrt(((aX - bX) * (aX - bX)) + (aY - bY) * (aY - bY));
 
-            double lenAB = Math.sqrt(((aX - bX) * (aX - bX)) + (aY - bY) * (aY - bY));
+        if (lenAB != length) {
+            double ratio = length / lenAB;
 
-            if (lenAB != length) {
-                double ratio = length / lenAB;
+            double cX = aX + (bX - aX) * ratio;
+            double cY = aY + (bY - aY) * ratio;
 
-                double cX = aX + (bX - aX) * ratio;
-                double cY = aY + (bY - aY) * ratio;
-
-                lineWithNewLength = new Line2D.Double(line.getX1(), line.getX2(), Math.round(cX), Math.round(cY));
-            }
-
-            return lineWithNewLength;
-        } else {
-            return null;
+            lineWithNewLength = new Line2D.Double(line.getX1(), line.getX2(), Math.round(cX), Math.round(cY));
         }
-
+        return lineWithNewLength;
     }
 
     private Line2D createLineBetween(Line2D line1, Line2D line2) {
@@ -190,11 +145,12 @@ public class Lines {
                 (int) (line1.getX1() + 500 * Math.cos(angle)),
                 (int) (line1.getY1() + 500 * Math.sin(angle))
         );
-
     }
 
     private Point2D.Float getIntersectionPoint(Line2D line1, Line2D line2) {
-        if (!line1.intersectsLine(line2)) return null;
+        if (!line1.intersectsLine(line2)) {
+            return null;
+        }
         double px = line1.getX1(),
                 py = line1.getY1(),
                 rx = line1.getX2() - px,
@@ -231,7 +187,6 @@ public class Lines {
                 line.getX2() - line.getX1());
     }
 
-
     private void sortLines(ArrayList<Line2D> lines) {
         Collections.sort(lines, new Comparator<Line2D>() {
             @Override
@@ -242,7 +197,6 @@ public class Lines {
     }
 
     public void createVisibleCornerPoints() {
-
         for (int row = 0; row < tileMap.getMapHeight(); row++) {
             for (int col = 0; col < tileMap.getMapWidth(); col++) {
 
@@ -304,7 +258,6 @@ public class Lines {
         return corners;
     }
 
-
     private ArrayList<Line2D> findParallelConnectedLine(Line2D targetLine, ArrayList<Line2D> lines) {
         ArrayList<Line2D> parallelLines = new ArrayList<Line2D>();
         for (Line2D line : lines) {
@@ -324,7 +277,7 @@ public class Lines {
                 return (int) ((o1.getX1() + o1.getY1()) - (o2.getX1() + o2.getY1()));
             }
         });
-        for (Line2D line : lines) {
+        for (int i = 0; i < lines.size(); i++) {
             Line2D firstLineToReplace = linesTmp.get(0);
             ArrayList<Line2D> linesToReplace = new ArrayList<Line2D>();
             linesTmp.remove(firstLineToReplace);
