@@ -1,6 +1,7 @@
 package dark_platform;
 
 import java.awt.*;
+import java.awt.GradientPaint;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.*;
@@ -62,7 +63,8 @@ public class Lines {
             prevMOD = currentMOD;
         }
 
-        g.setColor(new Color(7, 14, 54));
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setPaint(new GradientPaint(0, 0, new Color(7, 14, 54), 0, tileMap.getMapHeight()*tileMap.getTileSize(), Color.BLACK));
         g.setClip(new Polygon(convertIntegers(visiblePointsX), convertIntegers(visiblePointsY), visiblePointsX.size()));
         g.fillPolygon(convertIntegers(visiblePointsX), convertIntegers(visiblePointsY), visiblePointsX.size());
     }
@@ -96,7 +98,6 @@ public class Lines {
     private Line2D findFirstIntersectionLine(final Line2D line1, ArrayList<Line2D> lines) {
         ArrayList<Line2D> intersectionLines = new ArrayList<Line2D>();
         for (Line2D line : lines) {
-
             if (line.intersectsLine(line1)) {
                 intersectionLines.add(line);
             }
